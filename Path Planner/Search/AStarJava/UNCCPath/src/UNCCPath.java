@@ -29,6 +29,14 @@ class point {
     	return "[" + String.valueOf(cord[0]) + "," + String.valueOf(cord[1]) + "]";
     }
 
+    public boolean equals(point p) {
+        return (cord[0] == p.cord[0] && cord[1] == p.cord[1]);
+    }
+
+    public boolean equals(double[] p) {
+        return (cord[0] == p[0] && cord[1] == p[1]);
+    }
+
     //Return the parent point of the calling point
     point getParent() { return parent; }
 
@@ -39,8 +47,6 @@ class point {
 }
 
 public class UNCCPath {
-    //get names of starting and ending buildings
-    //get lats and lons of buildings
 
     private double[] goal = new double[2];
     private point start;
@@ -68,46 +74,33 @@ public class UNCCPath {
         //QUERY DATABASE FOR CLOSE POINTS//
         
         //FIXME - temporary, for testing until we get database up and running
-        Scanner input = new Scanner(new File("/home/matt19/Documents/Github/NinerJaunt/Path Planner/ReadingFiles/Points.txt"));
+        Scanner input = new Scanner(new File("B:\\Github\\NinerJaunt\\Path Planner\\ReadingFiles\\Points.txt"));
         StringTokenizer st;
-        double[] kid = new double[2];
+        double[] kid;
         
         while (input.hasNext()){
         	st = new StringTokenizer(input.nextLine(), ",");
+            kid = new double[2];
         	kid[0] = Double.parseDouble(st.nextToken());
         	kid[1] = Double.parseDouble(st.nextToken());
         	
-        	if (	(Math.abs(kid[0] - loc[0]) < 0.0002) && (Math.abs(kid[1] - loc[1]) < 0.0002)	){
-        		System.out.println("[" + String.valueOf(kid[0]) + "," + String.valueOf(kid[1]) + "]");
-        		children.add(kid);
+        	if (	(Math.abs(kid[0] - loc[0]) < 0.0007) && (Math.abs(kid[1] - loc[1]) < 0.0007)	){
+        		children.push(kid);
         	}
-        	
         }
         input.close();
-        
-        
         return children;
     }
     
-    private boolean inList(LinkedList<point> l, double[] loc){
-    	point p;
-    	System.out.println(l.size());
-    	for (int i = 0; i < l.size(); i++){
-    	
-    		p = l.get(i); 
-    		System.out.println(p.toString());
-    		System.out.println(String.valueOf(loc[0]) + ";" + String.valueOf(loc[1]));
-    		if (p.getCord()[0] == loc[0] && p.getCord()[1] == loc[1]) {
-				
-    			return true;
-    		}
-    	}
-    	return false;
+    private boolean listDoesNotContain(LinkedList<point> l, double[] loc){
+        for (point p : l)
+    		if (p.equals(loc)) return false;
+    	return true;
     }
 
     private LinkedList<double[]> genPath(point node, point start) {
         LinkedList<double[]> path = new LinkedList<>();
-        while (node.getCord() != start.getCord()) {
+        while (!node.equals(start)) {
             path.add(node.getCord());
             //get next node
             node = node.getParent();
@@ -128,15 +121,11 @@ public class UNCCPath {
 
         point node = new point(start);
         int states = 0;
-        
-        System.out.println("Started A*");
 
-        while(node.getCord()[0] != goal[0] && node.getCord()[1] != goal[1]){
+        while(!node.equals(goal)){
             states += 1;
-            
-            System.out.println("Node: " + node.toString());
 
-            if (node.getCord()[0] != goal[0] && node.getCord()[1] != goal[1]){
+            if (!node.equals(goal)){
                 closedlist.add(node);
                 
                 LinkedList<double[]> family;
@@ -145,15 +134,11 @@ public class UNCCPath {
                 	family = getChildren(node.getCord());
                 } catch (IOException e) {
                 	return null;
-                }  
-
-            	System.out.println("Closed: " + closedlist.toString());
+                }
             	
-            	double[] c;
-                for (int i = 0; i < family.size(); i++){
-                	c = family.get(i);
-                    if (!inList(openlist, c) && !inList(closedlist, c)){
-                    	//System.out.println("New kid added");
+            	for (int i = 0; i < family.size(); i++){
+                    double[] c = family.pop();
+                    if (listDoesNotContain(openlist,c) && listDoesNotContain(closedlist,c)){
                         kid = new point(node, c[0], c[1], calcH(c, goal));
                         openlist.add(kid);
                     }
@@ -165,7 +150,6 @@ public class UNCCPath {
                     }
                 });
             }
-            System.out.println("Open: " + openlist.toString());
             node = openlist.pop();
         }
 

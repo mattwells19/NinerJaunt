@@ -1,8 +1,11 @@
 import java.io.IOException;
+import java.util.LinkedList;
 
 public class TestUNCCPath {
 	public static void main(String args[]) throws IOException {
-		UNCCPath path = new UNCCPath(35.3097141,-80.7422587,35.3127977,-80.7408823);
-		System.out.println("Path: " + path.getPath());
+		UNCCPath path = new UNCCPath(35.3096309,-80.7423472,35.3103992,-80.7384969);
+
+        LinkedList<double[]> p = path.getPath();
+		for (double[] c : p) System.out.println("[" + String.valueOf(c[0]) + "," + String.valueOf(c[1]) + "]");
 	}
 }
