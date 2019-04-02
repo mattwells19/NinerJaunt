@@ -1,5 +1,7 @@
 import java.util.Comparator;
 import java.util.LinkedList;
+import java.io.*; //needed for File and IOException
+import java.util.*; //needed for Scanner class
 
 class point {
 
@@ -21,6 +23,10 @@ class point {
         parent = p.parent;
         cord[0] = p.cord[0]; cord[1] = p.cord[1];
         g = 1; h = p.h; f = p.f;
+    }
+    
+    public String toString(){
+    	return "[" + String.valueOf(cord[0]) + "," + String.valueOf(cord[1]) + "]";
     }
 
     //Return the parent point of the calling point
@@ -56,10 +62,47 @@ public class UNCCPath {
         return 3961 * c;  //3961 is the approximate radius of Earth in miles
     }
 
-    private LinkedList<double[]> getChildren(double[] loc){
+    private LinkedList<double[]> getChildren(double[] loc) throws IOException {
+    
         LinkedList<double[]> children = new LinkedList<>();
         //QUERY DATABASE FOR CLOSE POINTS//
+        
+        //FIXME - temporary, for testing until we get database up and running
+        Scanner input = new Scanner(new File("/home/matt19/Documents/Github/NinerJaunt/Path Planner/ReadingFiles/Points.txt"));
+        StringTokenizer st;
+        double[] kid = new double[2];
+        
+        while (input.hasNext()){
+        	st = new StringTokenizer(input.nextLine(), ",");
+        	kid[0] = Double.parseDouble(st.nextToken());
+        	kid[1] = Double.parseDouble(st.nextToken());
+        	
+        	if (	(Math.abs(kid[0] - loc[0]) < 0.0002) && (Math.abs(kid[1] - loc[1]) < 0.0002)	){
+        		System.out.println("[" + String.valueOf(kid[0]) + "," + String.valueOf(kid[1]) + "]");
+        		children.add(kid);
+        	}
+        	
+        }
+        input.close();
+        
+        
         return children;
+    }
+    
+    private boolean inList(LinkedList<point> l, double[] loc){
+    	point p;
+    	System.out.println(l.size());
+    	for (int i = 0; i < l.size(); i++){
+    	
+    		p = l.get(i); 
+    		System.out.println(p.toString());
+    		System.out.println(String.valueOf(loc[0]) + ";" + String.valueOf(loc[1]));
+    		if (p.getCord()[0] == loc[0] && p.getCord()[1] == loc[1]) {
+				
+    			return true;
+    		}
+    	}
+    	return false;
     }
 
     private LinkedList<double[]> genPath(point node, point start) {
@@ -76,28 +119,41 @@ public class UNCCPath {
     //														BEGIN A*												    //
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public LinkedList<double[]> getPath() {
+    public LinkedList<double[]> getPath() throws IOException {
 
         LinkedList<point> openlist = new LinkedList<>();
         LinkedList<point> closedlist = new LinkedList<>();
 
         point kid;
 
-        openlist.add(start);
-
         point node = new point(start);
         int states = 0;
+        
+        System.out.println("Started A*");
 
         while(node.getCord()[0] != goal[0] && node.getCord()[1] != goal[1]){
             states += 1;
+            
+            System.out.println("Node: " + node.toString());
 
             if (node.getCord()[0] != goal[0] && node.getCord()[1] != goal[1]){
                 closedlist.add(node);
+                
+                LinkedList<double[]> family;
+                
+                try {
+                	family = getChildren(node.getCord());
+                } catch (IOException e) {
+                	return null;
+                }  
 
-                LinkedList<double[]> family = getChildren(node.getCord());
-
-                for (double[] c : family){
-                    if (!openlist.contains(c) && !closedlist.contains(c)){
+            	System.out.println("Closed: " + closedlist.toString());
+            	
+            	double[] c;
+                for (int i = 0; i < family.size(); i++){
+                	c = family.get(i);
+                    if (!inList(openlist, c) && !inList(closedlist, c)){
+                    	//System.out.println("New kid added");
                         kid = new point(node, c[0], c[1], calcH(c, goal));
                         openlist.add(kid);
                     }
@@ -109,7 +165,8 @@ public class UNCCPath {
                     }
                 });
             }
-            node = openlist.getFirst();
+            System.out.println("Open: " + openlist.toString());
+            node = openlist.pop();
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
