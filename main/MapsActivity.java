@@ -18,6 +18,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     // Google Maps Variable
     private GoogleMap mMap;
+    private LatLng epicBuilding = new LatLng(35.309354, -80.741596);
+    private LatLng dukeCentennial = new LatLng(35.312156, -80.741289);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +37,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
+
+
+        if (getIntent() != null && getIntent().getExtras() != null) {
+            Log.d("/d", "Success Intent Received");
+            Log.d("/d", "Source Received: " + getIntent().getExtras().getString(MainActivity.SOURCE));
+            Log.d("/d", "Dest Received: " + getIntent().getExtras().getString(MainActivity.DEST));
+        }
+
         Log.d("/d", "onMapReady: Executing");
 
 
@@ -50,13 +60,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
 
+        // Set map to hybrid viewer
+        mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+
         // Add a marker for Epic and move the camera (Start Point)
-        LatLng epicBuilding = new LatLng(35.309354, -80.741596);
         mMap.addMarker(new MarkerOptions().position(epicBuilding).title("EPIC Building"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(epicBuilding));
 
 
-        // Create path points
         // This portion will be created upon export from DB
         LatLng p1 = new LatLng(35.311210, -80.741331);
         LatLng p2 = new LatLng(35.311448, -80.741667);
@@ -65,9 +75,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         // Create LatLng Variable for Duke Centennial Hall (End Point)
-        LatLng dukeCentennial = new LatLng(35.312156, -80.741289);
+
         mMap.addMarker(new MarkerOptions().position(dukeCentennial).title("Duke Centennial Hall"));
         mMap.moveCamera(CameraUpdateFactory.zoomTo((float) 15));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(epicBuilding));
 
 
         // Create a polyline from Epic to Duke Centennial Hall
