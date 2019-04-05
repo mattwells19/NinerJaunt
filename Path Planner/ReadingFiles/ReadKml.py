@@ -2,7 +2,7 @@ from pykml import parser
 import math
 from tkinter.filedialog import askopenfilename
 
-points_data = '/home/mattw/Desktop/Reading GPX Files/Points.txt'
+points_data = open(askopenfilename()).name
 
 '''
 This function will act as the Heurisitc for our A* search.

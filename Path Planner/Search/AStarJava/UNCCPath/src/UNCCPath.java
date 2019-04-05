@@ -10,11 +10,11 @@ class point {
     private double g, h, f;
 
     //Create point object with self, a parent point, x,y coordinates, and a heuristic value
-    point(point p,double lat,double lon,double heu) {
+    point(point p,double lat,double lon, double gcost, double heu) {
         parent = p;
         cord[0] = lat;
         cord[1] = lon;
-        g = 1;
+        g = gcost;
         h = heu;
         f = g + h;
     }
@@ -55,7 +55,7 @@ public class UNCCPath {
         goal[0] = endLat;
         goal[1] = endLon;
         double[] startLoc = {startLat, startLon};
-        start = new point(null, startLat, startLon, calcH(startLoc, goal)); //starting building
+        start = new point(null, startLat, startLon, 1, calcH(startLoc, goal)); //starting building
     }
 
     private double calcH(double[] cord1, double[] cord2) {
@@ -139,7 +139,7 @@ public class UNCCPath {
             	for (int i = 0; i < family.size(); i++){
                     double[] c = family.pop();
                     if (listDoesNotContain(openlist,c) && listDoesNotContain(closedlist,c)){
-                        kid = new point(node, c[0], c[1], calcH(c, goal));
+                        kid = new point(node, c[0], c[1], calcH(c, node.getCord()), calcH(c, goal));
                         openlist.add(kid);
                     }
                 }
