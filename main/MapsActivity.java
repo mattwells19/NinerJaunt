@@ -20,6 +20,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private LatLng epicBuilding = new LatLng(35.309354, -80.741596);
     private LatLng dukeCentennial = new LatLng(35.312156, -80.741289);
+    private LatLng source;
+    private LatLng destination;
+    private String sourceString;
+    private String destString;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +33,43 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-    }
+
+
+        // Receive intent
+        if (getIntent() != null && getIntent().getExtras() != null) {
+            Log.d("/d", "Success Intent Received");
+            Log.d("/d", "Source Received: " + getIntent().getExtras().getString(MainActivity.SOURCE));
+            Log.d("/d", "Dest Received: " + getIntent().getExtras().getString(MainActivity.DEST));
+
+             sourceString = getIntent().getExtras().getString(MainActivity.SOURCE);
+             destString = getIntent().getExtras().getString(MainActivity.DEST);
+
+            // Switch for source
+            switch (sourceString) {
+                case "EPIC":
+                   source = epicBuilding;
+                   Log.d("/d", "Source = epic");
+                   break;
+                case "Duke Hall":
+                    source = dukeCentennial;
+                    Log.d("/d", "Source = duke");
+                    break;
+            }
+
+            // Switch for dest
+            switch (destString) {
+                case "EPIC":
+                    destination = epicBuilding;
+                    Log.d("/d", "dest = epic");
+                    break;
+                case "Duke Hall":
+                    destination = dukeCentennial;
+                    Log.d("/d", "dest = duke");
+                    break;
+            }
+
+        }
+    } // end of onCreate function
 
 
     /**
@@ -39,11 +79,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
 
 
-        if (getIntent() != null && getIntent().getExtras() != null) {
-            Log.d("/d", "Success Intent Received");
-            Log.d("/d", "Source Received: " + getIntent().getExtras().getString(MainActivity.SOURCE));
-            Log.d("/d", "Dest Received: " + getIntent().getExtras().getString(MainActivity.DEST));
-        }
+
 
         Log.d("/d", "onMapReady: Executing");
 
@@ -63,8 +99,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Set map to hybrid viewer
         mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 
-        // Add a marker for Epic and move the camera (Start Point)
-        mMap.addMarker(new MarkerOptions().position(epicBuilding).title("EPIC Building"));
+        // Add a marker (Start Point)
+        mMap.addMarker(new MarkerOptions().position(source).title(sourceString));
+        mMap.addMarker(new MarkerOptions().position(destination).title(destString));
 
 
         // This portion will be created upon export from DB
@@ -74,16 +111,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
 
-        // Create LatLng Variable for Duke Centennial Hall (End Point)
+        // Add a marker + move the camera (End Point)
+        mMap.moveCamera(CameraUpdateFactory.zoomTo((float) 18));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(source));
 
-        mMap.addMarker(new MarkerOptions().position(dukeCentennial).title("Duke Centennial Hall"));
-        mMap.moveCamera(CameraUpdateFactory.zoomTo((float) 15));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(epicBuilding));
+        Log.d("/d", "Source String: " + sourceString);
+        Log.d("/d", "Source LatLNG: " + source);
+
+        Log.d("/d", "Dest String: " + destString);
+        Log.d("/d", "Dest LatLNG: " + destination);
+
 
 
         // Create a polyline from Epic to Duke Centennial Hall
         Polyline line = mMap.addPolyline(new PolylineOptions()
-        .add(epicBuilding,p1, p2, p3 ,dukeCentennial)
+        .add(source,p1, p2, p3 ,destination)
         .width(5)
         .color(Color.GREEN));
     }
