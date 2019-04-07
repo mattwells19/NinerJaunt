@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
         Spinner spinnerDest = findViewById(R.id.spinnerDest);
         ArrayAdapter<String> myAdapter2 = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1,
-                getResources().getStringArray(R.array.buildings2));
+                getResources().getStringArray(R.array.buildings));
         myAdapter2.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
         spinnerDest.setAdapter(myAdapter2);
 
@@ -78,6 +78,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Put the intent start + end
+                Log.d("/d", "Source Sent: " + item1);
+                Log.d("/d", "Dest Sent: " + item2);
                 intent.putExtra(SOURCE, item1);
                 intent.putExtra(DEST, item2);
 
