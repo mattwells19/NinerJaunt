@@ -43,7 +43,7 @@ class point {
     //Return (x,y) coordinates of calling point
     double[] getCord(){ return cord; }
 
-    double getH(){ return h; }
+    double getF(){ return f; }
 }
 
 public class UNCCPath {
@@ -68,7 +68,7 @@ public class UNCCPath {
         return 3961 * c;  //3961 is the approximate radius of Earth in miles
     }
 
-    private LinkedList<double[]> getChildren(double[] loc) throws IOException {
+    private LinkedList<double[]> getChildren(double[] loc, double radius) throws IOException {
     
         LinkedList<double[]> children = new LinkedList<>();
         //QUERY DATABASE FOR CLOSE POINTS//
@@ -77,16 +77,17 @@ public class UNCCPath {
         Scanner input = new Scanner(new File("B:\\Github\\NinerJaunt\\Path Planner\\ReadingFiles\\Points.txt"));
         StringTokenizer st;
         double[] kid;
-        
-        while (input.hasNext()){
-        	st = new StringTokenizer(input.nextLine(), ",");
+
+        while (input.hasNext()) {
+            st = new StringTokenizer(input.nextLine(), ",");
             kid = new double[2];
-        	kid[0] = Double.parseDouble(st.nextToken());
-        	kid[1] = Double.parseDouble(st.nextToken());
-        	
-        	if (	(Math.abs(kid[0] - loc[0]) < 0.0007) && (Math.abs(kid[1] - loc[1]) < 0.0007)	){
-        		children.push(kid);
-        	}
+            kid[0] = Double.parseDouble(st.nextToken());
+            kid[1] = Double.parseDouble(st.nextToken());
+
+
+            if ((Math.abs(kid[0] - loc[0]) < radius) && (Math.abs(kid[1] - loc[1]) < radius)) {
+                children.push(kid);
+            }
         }
         input.close();
         return children;
@@ -131,7 +132,11 @@ public class UNCCPath {
                 LinkedList<double[]> family;
                 
                 try {
-                	family = getChildren(node.getCord());
+                    double radius = 0.0003;
+                    do {
+                        family = getChildren(node.getCord(), radius);
+                        radius += 0.0001;
+                    } while (family.size() == 0);
                 } catch (IOException e) {
                 	return null;
                 }
@@ -146,7 +151,7 @@ public class UNCCPath {
                 openlist.sort(new Comparator<point>() {
                     @Override
                     public int compare(point o1, point o2) {
-                        return (int)Math.round(o1.getH() - o2.getH());
+                        return (int)(o1.getF() - o2.getF());
                     }
                 });
             }
