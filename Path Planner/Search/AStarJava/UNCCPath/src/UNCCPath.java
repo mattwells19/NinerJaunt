@@ -5,7 +5,7 @@ import java.util.*; //needed for Scanner class
 
 class point {
 
-	final double radius = 0.0005;
+	final double radius = 0.0001;
 
     private point parent;
     private double[] cord = new double[2];
@@ -50,7 +50,7 @@ class point {
 
 public class UNCCPath {
 
-	final double radius = 0.0005;
+	final double radius = 0.0001;
 
     private double[] goal = new double[2];
     private point start;
@@ -78,29 +78,21 @@ public class UNCCPath {
         //QUERY DATABASE FOR CLOSE POINTS//
         
         //FIXME - temporary, for testing until we get database up and running
-        Scanner input = new Scanner(new File("/home/matt19/Documents/Github/NinerJaunt/Path Planner/ReadingFiles/Points.txt"));
+        Scanner input = new Scanner(new File("/home/mattw/Documents/Github/NinerJaunt/Path Planner/ReadingFiles/Points.txt"));
         StringTokenizer st;
         double[] kid;
 
         while (input.hasNext()) {
             st = new StringTokenizer(input.nextLine(), ",");
             kid = new double[2];
-<<<<<<< HEAD
+            
         	kid[0] = Double.parseDouble(st.nextToken());
         	kid[1] = Double.parseDouble(st.nextToken());
         	
         	if (	(Math.abs(kid[0] - loc[0]) < radius) && (Math.abs(kid[1] - loc[1]) < radius)	){
         		children.push(kid);
         	}
-=======
-            kid[0] = Double.parseDouble(st.nextToken());
-            kid[1] = Double.parseDouble(st.nextToken());
-
-
-            if ((Math.abs(kid[0] - loc[0]) < radius) && (Math.abs(kid[1] - loc[1]) < radius)) {
-                children.push(kid);
-            }
->>>>>>> 7038ae038f1b09e3c1b27d465aa0c7811965c86e
+            
         }
         input.close();
         return children;
@@ -166,11 +158,11 @@ public class UNCCPath {
                 openlist.sort(new Comparator<point>() {
                     @Override
                     public int compare(point o1, point o2) {
-<<<<<<< HEAD
-                        return (o1.getH() - o2.getH()) <= 0 ? -1 : 1;
-=======
-                        return (int)(o1.getF() - o2.getF());
->>>>>>> 7038ae038f1b09e3c1b27d465aa0c7811965c86e
+
+                        return (o1.getF() - o2.getF()) <= 0 ? -1 : 1;
+
+                        //return (int)(o1.getF() - o2.getF());
+
                     }
                 });
             }

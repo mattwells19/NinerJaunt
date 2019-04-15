@@ -1,6 +1,7 @@
 from pykml import parser
 import math
 from tkinter.filedialog import askopenfilename
+from bs4 import BeautifulSoup
 
 points_data = open(askopenfilename()).name
 
@@ -28,10 +29,33 @@ def showPoints():
             print([float(x) for x in l.split(',')])
 
 
+
+def process_coordinate_string(str):
+	"""
+	Take the coordinate string from the KML file, and break it up into [Lat,Lon,Lat,Lon...] for a CSV row
+	"""
+	space_splits = str.split(" ")
+	ret = []
+	# There was a space in between <coordinates>" "-80.123...... hence the [1:]
+	for split in space_splits[1:]:
+		comma_split = split.split(',')
+		try:
+			ret.append(comma_split[1])    # lat
+			ret.append(comma_split[0])    # lng
+		except:
+			continue
+	return ret
+    
 def addPoints(kmxInput):
-	f = open(points_data, 'a')
-	with open(kmxInput) as kf:
-		print(parser.parse(kf))
+	p = open(points_data, 'a')
+	with open(kmxInput, 'r') as f:
+		s = BeautifulSoup(f, 'xml')
+		for coords in s.find_all('coordinates'):
+			for i,line in enumerate(process_coordinate_string(coords.string)):
+				if (i % 2 == 0):
+					p.write(str(line) + ",")
+				else:
+					p.write(str(line) + '\n')
 	f.close()
 
 
