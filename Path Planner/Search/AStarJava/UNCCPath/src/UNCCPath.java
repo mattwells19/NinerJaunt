@@ -5,7 +5,7 @@ import java.util.*; //needed for Scanner class
 
 class point {
 
-	final double radius = 0.000005;
+	//final double radius = 0.000005;
 
     private point parent;
     private double[] cord = new double[2];
@@ -50,9 +50,46 @@ class point {
     double getF(){ return f; }
 }
 
+
+class circArray {
+
+	public int size;
+	private point[] circle;
+	private int head = 0;
+
+	circArray(int s){
+		size = s;
+		circle = new point[size];
+	}
+	
+	public void push(point p){
+		if (head == size) head = 0;
+		circle[head] = p;
+		head++;
+	}
+	
+	public point pop(){
+		point p = new point(circle[head]);
+		head--;
+		return p;
+	}
+	
+	public boolean contains(double[] p){
+		for (int i = 0; i < size; i++){
+			try{
+				if (circle[i].equals(p)) return true;
+			} catch (Exception e){
+				continue;
+			}
+		}
+		return false;
+	}
+}
+
+
 public class UNCCPath {
 
-	final double radius = 0.00006;
+	final double radius = 0.00005;
 
     private double[] goal = new double[2];
     private point start;
@@ -125,9 +162,11 @@ public class UNCCPath {
     public LinkedList<double[]> getPath() throws IOException {
 
         LinkedList<point> openlist = new LinkedList<>();
-        LinkedList<point> closedlist = new LinkedList<>();
+        LinkedList<point> closedList = new LinkedList<>();
+        //circArray closedList = new circArray(10);
 
         point kid;
+        LinkedList<double[]> family;
 
         point node = new point(start);
         int states = 0;
@@ -136,23 +175,24 @@ public class UNCCPath {
             states += 1;
 
             if (!node.equals(goal)){
-                closedlist.add(node);
-                
-                LinkedList<double[]> family;
-                
+                closedList.add(node);
+                             
                 try {
                     family = getChildren(node.getCord());
                 } catch (IOException e) {
                 	return null;
                 }
-            	
-            	for (int i = 0; i < family.size(); i++){
+            	            	
+            	while (family.size() != 0){
                     double[] c = family.pop();
-                    if (listDoesNotContain(openlist,c) && listDoesNotContain(closedlist,c)){
+                    
+                    if (listDoesNotContain(openlist,c) && listDoesNotContain(closedList,c)){
                         kid = new point(node, c[0], c[1], calcH(c, node.getCord()), calcH(c, goal));
                         openlist.add(kid);
                     }
+                    
                 }
+                                
                 openlist.sort(new Comparator<point>() {
                     @Override
                     public int compare(point o1, point o2) {
@@ -165,15 +205,15 @@ public class UNCCPath {
                 });
             }
             
-            for (point x : openlist){
+            /*for (point x : openlist){
             	System.out.print(x.toString() + " ; ");
             }
-            System.out.println();
+            System.out.println();*/
             
             try {
             	node = openlist.removeLast();
             } catch(Exception e) {
-            	//System.out.println("Unable to pop openlist. Size: " + openlist.size()); 
+            	System.out.println("Unable to pop openlist. Size: " + openlist.size()); 
             	break;
             }
         }
