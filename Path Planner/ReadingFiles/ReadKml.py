@@ -47,7 +47,7 @@ def process_coordinate_string(str):
 	return ret
     
 def addPoints(kmxInput):
-	p = open(points_data, 'a')
+	p = open(points_data, 'w')
 	with open(kmxInput, 'r') as f:
 		s = BeautifulSoup(f, 'xml')
 		for coords in s.find_all('coordinates'):

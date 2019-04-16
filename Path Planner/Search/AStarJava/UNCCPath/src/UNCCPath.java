@@ -5,7 +5,7 @@ import java.util.*; //needed for Scanner class
 
 class point {
 
-	final double radius = 0.0001;
+	final double radius = 0.000005;
 
     private point parent;
     private double[] cord = new double[2];
@@ -16,7 +16,7 @@ class point {
         parent = p;
         cord[0] = lat;
         cord[1] = lon;
-        g = gcost;
+        g = 1;
         h = heu;
         f = g + h;
     }
@@ -32,11 +32,13 @@ class point {
     }
 
     public boolean equals(point p) {
-        return ((Math.abs(cord[0] - p.cord[0]) < radius) && (Math.abs(cord[1] - p.cord[1]) < radius));
+    	return ( (cord[0] - p.cord[0]) == 0 && (cord[1] - p.cord[1]) == 0 );
+        //return ((Math.abs(cord[0] - p.cord[0]) < radius) && (Math.abs(cord[1] - p.cord[1]) < radius));
     }
 
     public boolean equals(double[] p) {
-        return (cord[0] == p[0] && cord[1] == p[1]);
+    	return ( (cord[0] - p[0]) == 0 && (cord[1] - p[1]) == 0 );
+    	//return (Math.abs(cord[0] - p[0]) < radius) && (Math.abs(cord[1] - p[1]) < radius);
     }
 
     //Return the parent point of the calling point
@@ -50,7 +52,7 @@ class point {
 
 public class UNCCPath {
 
-	final double radius = 0.0001;
+	final double radius = 0.00006;
 
     private double[] goal = new double[2];
     private point start;
@@ -72,7 +74,7 @@ public class UNCCPath {
         return 3961 * c;  //3961 is the approximate radius of Earth in miles
     }
 
-    private LinkedList<double[]> getChildren(double[] loc, double radius) throws IOException {
+    private LinkedList<double[]> getChildren(double[] loc) throws IOException {
     
         LinkedList<double[]> children = new LinkedList<>();
         //QUERY DATABASE FOR CLOSE POINTS//
@@ -106,13 +108,13 @@ public class UNCCPath {
 
     private LinkedList<double[]> genPath(point node, point start, double[] goal) {
         LinkedList<double[]> path = new LinkedList<>();
+        path.add(goal);
         while (!node.equals(start)) {
             path.add(node.getCord());
             //get next node
             node = node.getParent();
         }
-        path.addFirst(start.getCord());
-        path.addLast(goal);
+        path.add(start.getCord());
         return path;
     }
 
@@ -139,11 +141,7 @@ public class UNCCPath {
                 LinkedList<double[]> family;
                 
                 try {
-                    double radius = 0.0003;
-                    do {
-                        family = getChildren(node.getCord(), radius);
-                        radius += 0.0001;
-                    } while (family.size() == 0);
+                    family = getChildren(node.getCord());
                 } catch (IOException e) {
                 	return null;
                 }
@@ -175,7 +173,8 @@ public class UNCCPath {
             try {
             	node = openlist.removeLast();
             } catch(Exception e) {
-            	System.out.println("Unable to pop openlist. Size: " + openlist.size()); break;
+            	//System.out.println("Unable to pop openlist. Size: " + openlist.size()); 
+            	break;
             }
         }
 
