@@ -89,7 +89,7 @@ class circArray {
 
 public class UNCCPath {
 
-	final double radius = 0.00005;
+	final double radius = 0.00006;
 
     private double[] goal = new double[2];
     private point start;
@@ -117,7 +117,7 @@ public class UNCCPath {
         //QUERY DATABASE FOR CLOSE POINTS//
         
         //FIXME - temporary, for testing until we get database up and running
-        Scanner input = new Scanner(new File("/home/mattw/Documents/Github/NinerJaunt/Path Planner/ReadingFiles/Points.txt"));
+        Scanner input = new Scanner(new File("C:\\Users\\mattw\\Documents\\GitHub\\NinerJaunt\\Path Planner\\ReadingFiles\\Points.txt"));
         StringTokenizer st;
         double[] kid;
 
