@@ -1,4 +1,4 @@
-from pykml import parser
+#from pykml import parser
 import math
 from tkinter.filedialog import askopenfilename
 from bs4 import BeautifulSoup

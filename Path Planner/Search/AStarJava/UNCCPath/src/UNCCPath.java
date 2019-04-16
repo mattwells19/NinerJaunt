@@ -28,7 +28,7 @@ class point {
     }
     
     public String toString(){
-    	return "[" + String.valueOf(cord[0]) + "," + String.valueOf(cord[1]) + "]";
+    	return "" + String.valueOf(cord[0]) + "," + String.valueOf(cord[1]) + "";
     }
 
     public boolean equals(point p) {
@@ -51,45 +51,9 @@ class point {
 }
 
 
-class circArray {
-
-	public int size;
-	private point[] circle;
-	private int head = 0;
-
-	circArray(int s){
-		size = s;
-		circle = new point[size];
-	}
-	
-	public void push(point p){
-		if (head == size) head = 0;
-		circle[head] = p;
-		head++;
-	}
-	
-	public point pop(){
-		point p = new point(circle[head]);
-		head--;
-		return p;
-	}
-	
-	public boolean contains(double[] p){
-		for (int i = 0; i < size; i++){
-			try{
-				if (circle[i].equals(p)) return true;
-			} catch (Exception e){
-				continue;
-			}
-		}
-		return false;
-	}
-}
-
-
 public class UNCCPath {
 
-	final double radius = 0.00006;
+	final double radius = 0.00009;
 
     private double[] goal = new double[2];
     private point start;
@@ -102,13 +66,14 @@ public class UNCCPath {
     }
 
     private double calcH(double[] cord1, double[] cord2) {
-        double dlon = cord2[1] - cord1[1];
+        return Math.sqrt( Math.pow(cord2[0] - cord1[0],2) +  Math.pow(cord2[1] - cord1[1],2) );
+        /*double dlon = cord2[1] - cord1[1];
         double dlat = cord2[0] - cord1[0];
         dlon = dlon * Math.PI / 180.0;
         dlat = dlat * Math.PI / 180.0;
         double a = Math.pow((Math.sin(dlat / 2)), 2) + Math.cos(cord1[0]) * Math.cos(cord2[0]) * Math.pow((Math.sin(dlon / 2)), 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return 3961 * c;  //3961 is the approximate radius of Earth in miles
+        return 3961 * c;  //3961 is the approximate radius of Earth in miles*/
     }
 
     private LinkedList<double[]> getChildren(double[] loc) throws IOException {
@@ -216,6 +181,8 @@ public class UNCCPath {
             	System.out.println("Unable to pop openlist. Size: " + openlist.size()); 
             	break;
             }
+
+            //System.out.println(node);
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
