@@ -5,17 +5,14 @@ import java.util.*; //needed for Scanner class
 
 class point {
 
-	//final double radius = 0.000005;
-
     private point parent;
-    private double[] cord = new double[2];
+    private double[] cord;
     private double g, h, f;
 
     //Create point object with self, a parent point, x,y coordinates, and a heuristic value
     point(point p,double lat,double lon, double gcost, double heu) {
         parent = p;
-        cord[0] = lat;
-        cord[1] = lon;
+        cord = new double[] {lat, lon};
         g = 1;
         h = heu;
         f = g + h;
@@ -23,7 +20,7 @@ class point {
 
     point(point p){
         parent = p.parent;
-        cord[0] = p.cord[0]; cord[1] = p.cord[1];
+        cord = new double[] {p.getCord()[0], p.getCord()[1]};
         g = 1; h = p.h; f = p.f;
     }
     
@@ -32,12 +29,12 @@ class point {
     }
 
     public boolean equals(point p) {
-    	return ( (cord[0] - p.cord[0]) == 0 && (cord[1] - p.cord[1]) == 0 );
+    	return ( (cord[0] - p.cord[0]) == 0.0 && (cord[1] - p.cord[1]) == 0.0 );
         //return ((Math.abs(cord[0] - p.cord[0]) < radius) && (Math.abs(cord[1] - p.cord[1]) < radius));
     }
 
     public boolean equals(double[] p) {
-    	return ( (cord[0] - p[0]) == 0 && (cord[1] - p[1]) == 0 );
+    	return ( (cord[0] - p[0]) == 0.0 && (cord[1] - p[1]) == 0.0 );
     	//return (Math.abs(cord[0] - p[0]) < radius) && (Math.abs(cord[1] - p[1]) < radius);
     }
 
@@ -53,15 +50,15 @@ class point {
 
 public class UNCCPath {
 
-	final double radius = 0.00009;
+	final double radius = 0.0001;
+	//35.3094691
 
-    private double[] goal = new double[2];
+    private double[] goal, startLoc;
     private point start;
 
     UNCCPath(double startLat, double startLon, double endLat, double endLon) {
-        goal[0] = endLat;
-        goal[1] = endLon;
-        double[] startLoc = {startLat, startLon};
+        goal = new double[] {endLat, endLon};
+        startLoc = new double[] {startLat, startLon};
         start = new point(null, startLat, startLon, 1, calcH(startLoc, goal)); //starting building
     }
 
@@ -79,10 +76,11 @@ public class UNCCPath {
     private LinkedList<double[]> getChildren(double[] loc) throws IOException {
     
         LinkedList<double[]> children = new LinkedList<>();
+        double distOfKid = 0;
         //QUERY DATABASE FOR CLOSE POINTS//
         
         //FIXME - temporary, for testing until we get database up and running
-        Scanner input = new Scanner(new File("C:\\Users\\mattw\\Documents\\GitHub\\NinerJaunt\\Path Planner\\ReadingFiles\\Points.txt"));
+        Scanner input = new Scanner(new File("/home/matt19/Documents/Github/NinerJaunt/Path Planner/ReadingFiles/Points.txt"));
         StringTokenizer st;
         double[] kid;
 
@@ -93,7 +91,9 @@ public class UNCCPath {
         	kid[0] = Double.parseDouble(st.nextToken());
         	kid[1] = Double.parseDouble(st.nextToken());
         	
-        	if (	(Math.abs(kid[0] - loc[0]) < radius) && (Math.abs(kid[1] - loc[1]) < radius)	){
+        	distOfKid = calcH(loc, kid);
+        	        	
+        	if (distOfKid <= radius){
         		children.push(kid);
         	}
             
@@ -128,16 +128,13 @@ public class UNCCPath {
 
         LinkedList<point> openlist = new LinkedList<>();
         LinkedList<point> closedList = new LinkedList<>();
-        //circArray closedList = new circArray(10);
 
         point kid;
         LinkedList<double[]> family;
 
         point node = new point(start);
-        int states = 0;
 
         while(!node.equals(goal)){
-            states += 1;
 
             if (!node.equals(goal)){
                 closedList.add(node);
@@ -147,6 +144,8 @@ public class UNCCPath {
                 } catch (IOException e) {
                 	return null;
                 }
+                
+                System.out.println(family.size());
             	            	
             	while (family.size() != 0){
                     double[] c = family.pop();
@@ -162,7 +161,7 @@ public class UNCCPath {
                     @Override
                     public int compare(point o1, point o2) {
 
-                        return (o1.getF() - o2.getF()) <= 0 ? -1 : 1;
+                        return (o1.getF() - o2.getF()) <= 0.0 ? -1 : 1;
 
                         //return (int)(o1.getF() - o2.getF());
 
@@ -170,19 +169,19 @@ public class UNCCPath {
                 });
             }
             
-            /*for (point x : openlist){
-            	System.out.print(x.toString() + " ; ");
+            for (point x : openlist){
+            	System.out.println(x.toString());
             }
-            System.out.println();*/
+            System.out.println();
             
             try {
-            	node = openlist.removeLast();
+            	node = openlist.removeFirst();
             } catch(Exception e) {
             	System.out.println("Unable to pop openlist. Size: " + openlist.size()); 
             	break;
             }
 
-            //System.out.println(node);
+            System.out.println(node);
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
