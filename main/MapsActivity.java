@@ -1,6 +1,10 @@
 package com.example.ninerjaunt;
 
+import android.app.ProgressDialog;
 import android.graphics.Color;
+import android.graphics.Path;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,20 +18,30 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Map;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     // Google Maps Variable
     private GoogleMap mMap;
-    private LatLng epicBuilding = new LatLng(35.309354, -80.741596);
-    private LatLng dukeCentennial = new LatLng(35.312156, -80.741289);
+
     private LatLng source;
     private LatLng destination;
     private String sourceString;
     private String destString;
+    public static ArrayList<LatLng> latLngArrayList = new ArrayList<>();
 
+
+    // API Requirements
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -35,38 +49,38 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
 
-        // Receive intent
+        // Receive Intent from MainActivity.java
         if (getIntent() != null && getIntent().getExtras() != null) {
-            Log.d("/d", "Success Intent Received");
             Log.d("/d", "Source Received: " + getIntent().getExtras().getString(MainActivity.SOURCE));
             Log.d("/d", "Dest Received: " + getIntent().getExtras().getString(MainActivity.DEST));
 
-             sourceString = getIntent().getExtras().getString(MainActivity.SOURCE);
-             destString = getIntent().getExtras().getString(MainActivity.DEST);
+            sourceString = getIntent().getExtras().getString(MainActivity.SOURCE);
+            destString = getIntent().getExtras().getString(MainActivity.DEST);
 
-            // Switch for source
-            switch (sourceString) {
-                case "EPIC":
-                   source = epicBuilding;
-                   Log.d("/d", "Source = epic");
-                   break;
-                case "Duke Hall":
-                    source = dukeCentennial;
-                    Log.d("/d", "Source = duke");
-                    break;
-            }
+            // Call method return latlng of source and dest (Utilize the Controller)
+            source = PathController.spinnerSwitch(sourceString);
+            destination = PathController.spinnerSwitch(destString);
 
-            // Switch for dest
-            switch (destString) {
-                case "EPIC":
-                    destination = epicBuilding;
-                    Log.d("/d", "dest = epic");
-                    break;
-                case "Duke Hall":
-                    destination = dukeCentennial;
-                    Log.d("/d", "dest = duke");
-                    break;
+
+            UNCCPath path = new UNCCPath(source.latitude, source.longitude, destination.latitude, destination.longitude);
+
+            // latLngArrayList.add(source);
+
+
+            try {
+                LinkedList<double[]> p = path.getPath();
+                Log.d("/d", "Size of Path: " + String.valueOf(p.size()));
+                for (double[] c : p) {
+                    latLngArrayList.add(new LatLng((c[0]), c[1]));
+                    Log.d("/d", "[" + String.valueOf(c[0]) + "," + String.valueOf(c[1]) + "]");
+                }
+
+            } catch (IOException e) {
+                Log.d("/d", "Exc Throw");
+                e.printStackTrace();
             }
+            // latLngArrayList.add(destination);
+
 
         }
     } // end of onCreate function
@@ -79,36 +93,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
 
 
-
-
+        // Log Statement to indicate onMapRunning
         Log.d("/d", "onMapReady: Executing");
 
 
         // Google Map Variable
         mMap = googleMap;
 
-        // On Camera Move
-        mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
-            @Override
-            public void onCameraMove() {
-            Log.d("/d", "Camera Moving...");
-            }
-        });
-
-
-        // Set map to hybrid viewer
+        // Set map to Hybrid View (Satellite + Street)
         mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 
-        // Add a marker (Start Point)
+        // Add Markers for start and end point
         mMap.addMarker(new MarkerOptions().position(source).title(sourceString));
         mMap.addMarker(new MarkerOptions().position(destination).title(destString));
 
 
-        // This portion will be created upon export from DB
-        LatLng p1 = new LatLng(35.311210, -80.741331);
-        LatLng p2 = new LatLng(35.311448, -80.741667);
-        LatLng p3 = new LatLng(35.311608, -80.741487);
-
+        // Create a polyline using latLngArrayList
+        Polyline line = mMap.addPolyline(new PolylineOptions()
+                .width(5)
+                .color(Color.GREEN));
+        line.setPoints(latLngArrayList);
 
 
         // Add a marker + move the camera (End Point)
@@ -122,11 +126,5 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Log.d("/d", "Dest LatLNG: " + destination);
 
 
-
-        // Create a polyline from Epic to Duke Centennial Hall
-        Polyline line = mMap.addPolyline(new PolylineOptions()
-        .add(source,p1, p2, p3 ,destination)
-        .width(5)
-        .color(Color.GREEN));
     }
 }
