@@ -8,6 +8,7 @@ class point {
     private point parent;
     private double[] cord;
     private double g, h, f;
+    private final double radius = 0.0001;
 
     //Create point object with self, a parent point, x,y coordinates, and a heuristic value
     point(point p,double lat,double lon, double gcost, double heu) {
@@ -30,12 +31,14 @@ class point {
 
     public boolean equals(point p) {
     	return ( (cord[0] - p.cord[0]) == 0.0 && (cord[1] - p.cord[1]) == 0.0 );
-        //return ((Math.abs(cord[0] - p.cord[0]) < radius) && (Math.abs(cord[1] - p.cord[1]) < radius));
+    }
+    
+    public double calcDist(double[] cord1) {
+        return Math.sqrt( Math.pow(cord[0] - cord1[0],2) +  Math.pow(cord[1] - cord1[1],2) );
     }
 
     public boolean equals(double[] p) {
-    	return ( (cord[0] - p[0]) == 0.0 && (cord[1] - p[1]) == 0.0 );
-    	//return (Math.abs(cord[0] - p[0]) < radius) && (Math.abs(cord[1] - p[1]) < radius);
+    	return calcDist(p) < radius;
     }
 
     //Return the parent point of the calling point
@@ -50,8 +53,7 @@ class point {
 
 public class UNCCPath {
 
-	final double radius = 0.0001;
-	//35.3094691
+	final double radius = 0.0002;
 
     private double[] goal, startLoc;
     private point start;
@@ -62,24 +64,15 @@ public class UNCCPath {
         start = new point(null, startLat, startLon, 1, calcH(startLoc, goal)); //starting building
     }
 
-    private double calcH(double[] cord1, double[] cord2) {
+    public double calcH(double[] cord1, double[] cord2) {
         return Math.sqrt( Math.pow(cord2[0] - cord1[0],2) +  Math.pow(cord2[1] - cord1[1],2) );
-        /*double dlon = cord2[1] - cord1[1];
-        double dlat = cord2[0] - cord1[0];
-        dlon = dlon * Math.PI / 180.0;
-        dlat = dlat * Math.PI / 180.0;
-        double a = Math.pow((Math.sin(dlat / 2)), 2) + Math.cos(cord1[0]) * Math.cos(cord2[0]) * Math.pow((Math.sin(dlon / 2)), 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return 3961 * c;  //3961 is the approximate radius of Earth in miles*/
     }
 
     private LinkedList<double[]> getChildren(double[] loc) throws IOException {
     
         LinkedList<double[]> children = new LinkedList<>();
         double distOfKid = 0;
-        //QUERY DATABASE FOR CLOSE POINTS//
         
-        //FIXME - temporary, for testing until we get database up and running
         Scanner input = new Scanner(new File("/home/matt19/Documents/Github/NinerJaunt/Path Planner/ReadingFiles/Points.txt"));
         StringTokenizer st;
         double[] kid;
@@ -91,7 +84,7 @@ public class UNCCPath {
         	kid[0] = Double.parseDouble(st.nextToken());
         	kid[1] = Double.parseDouble(st.nextToken());
         	
-        	distOfKid = calcH(loc, kid);
+        	distOfKid = calcH(kid, loc);
         	        	
         	if (distOfKid <= radius){
         		children.push(kid);
@@ -110,13 +103,13 @@ public class UNCCPath {
 
     private LinkedList<double[]> genPath(point node, point start, double[] goal) {
         LinkedList<double[]> path = new LinkedList<>();
-        path.add(goal);
+        path.addFirst(goal);
         while (!node.equals(start)) {
-            path.add(node.getCord());
+            path.addFirst(node.getCord());
             //get next node
             node = node.getParent();
         }
-        path.add(start.getCord());
+        path.addFirst(start.getCord());
         return path;
     }
 
@@ -144,9 +137,7 @@ public class UNCCPath {
                 } catch (IOException e) {
                 	return null;
                 }
-                
-                System.out.println(family.size());
-            	            	
+                            	            	
             	while (family.size() != 0){
                     double[] c = family.pop();
                     
@@ -163,25 +154,22 @@ public class UNCCPath {
 
                         return (o1.getF() - o2.getF()) <= 0.0 ? -1 : 1;
 
-                        //return (int)(o1.getF() - o2.getF());
-
                     }
                 });
             }
             
-            for (point x : openlist){
+            //Debugging openlist
+            /*for (point x : openlist){
             	System.out.println(x.toString());
             }
-            System.out.println();
+            System.out.println();*/
             
             try {
             	node = openlist.removeFirst();
             } catch(Exception e) {
-            	System.out.println("Unable to pop openlist. Size: " + openlist.size()); 
             	break;
             }
 
-            System.out.println(node);
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
