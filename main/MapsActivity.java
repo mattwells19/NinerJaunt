@@ -8,6 +8,8 @@ import android.support.annotation.RequiresApi;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -33,6 +35,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private String sourceString;
     private String destString;
     public static ArrayList<LatLng> latLngArrayList = new ArrayList<>();
+    int x = 0;
 
 
     // API Requirements
@@ -49,6 +52,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
 
+
+
+
+
         // Receive Intent from MainActivity.java
         if (getIntent() != null && getIntent().getExtras() != null) {
             Log.d("/d", "Source Received: " + getIntent().getExtras().getString(MainActivity.SOURCE));
@@ -57,12 +64,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             sourceString = getIntent().getExtras().getString(MainActivity.SOURCE);
             destString = getIntent().getExtras().getString(MainActivity.DEST);
 
+            PathController pathController = new PathController();
+
             // Call method return latlng of source and dest (Utilize the Controller)
-            source = PathController.spinnerSwitch(sourceString);
-            destination = PathController.spinnerSwitch(destString);
+            source = pathController.spinnerSwitch(sourceString);
+            destination = pathController.spinnerSwitch(destString);
 
 
-            UNCCPath path = new UNCCPath(source.latitude, source.longitude, destination.latitude, destination.longitude);
+
+
+             UNCCPath path = new UNCCPath(source.latitude, source.longitude, destination.latitude, destination.longitude);
 
             // latLngArrayList.add(source);
 
@@ -103,7 +114,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Set map to Hybrid View (Satellite + Street)
         mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 
+
+
+        Button button = findViewById(R.id.ChangeMapView);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (x == 0) {
+                    mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                    x = 1;
+                } else if (x == 1) {
+                    mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                    x = 2;
+                } else if (x == 2) {
+                    mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                    x = 3;
+                } else if (x == 3) {
+                    mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+                    x = 0;
+                }
+
+            }
+        });
+
         // Add Markers for start and end point
+        Log.d("/d", "Source String: " + sourceString);
+        Log.d("/d", "Source position: " + source.latitude  + ", " + source.longitude);
+        Log.d("/d", "Dest position: " + destination.latitude  + ", " + destination.longitude);
+        Log.d("/d", "Dest String: " + destString);
         mMap.addMarker(new MarkerOptions().position(source).title(sourceString));
         mMap.addMarker(new MarkerOptions().position(destination).title(destString));
 
@@ -116,7 +154,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         // Add a marker + move the camera (End Point)
-        mMap.moveCamera(CameraUpdateFactory.zoomTo((float) 18));
+        mMap.moveCamera(CameraUpdateFactory.zoomTo((float) 15));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(source));
 
         Log.d("/d", "Source String: " + sourceString);

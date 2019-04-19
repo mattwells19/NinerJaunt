@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
         ArrayAdapter<String> myAdapter2 = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1,
                 getResources().getStringArray(R.array.buildings));
         myAdapter2.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
+        spinnerDest.setSelection(2);
         spinnerDest.setAdapter(myAdapter2);
 
 
