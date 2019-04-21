@@ -30,6 +30,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // Google Maps Variable
     private GoogleMap mMap;
 
+    // Class Variables
     private LatLng source;
     private LatLng destination;
     private String sourceString;
@@ -44,16 +45,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Reset the Array if user reloads App
+        latLngArrayList.clear();
+
 
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-
-
-
 
 
         // Receive Intent from MainActivity.java
@@ -71,13 +71,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             destination = pathController.spinnerSwitch(destString);
 
 
+            UNCCPath path = new UNCCPath(source.latitude, source.longitude, destination.latitude, destination.longitude);
 
 
-             UNCCPath path = new UNCCPath(source.latitude, source.longitude, destination.latitude, destination.longitude);
-
-            // latLngArrayList.add(source);
-
-
+            // Get the path generated load into arraylist
             try {
                 LinkedList<double[]> p = path.getPath();
                 Log.d("/d", "Size of Path: " + String.valueOf(p.size()));
@@ -90,7 +87,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Log.d("/d", "Exc Throw");
                 e.printStackTrace();
             }
-            // latLngArrayList.add(destination);
 
 
         }
@@ -115,7 +111,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 
 
-
+        // Change mapType functionality
         Button button = findViewById(R.id.ChangeMapView);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -137,10 +133,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-        // Add Markers for start and end point
+        // Add Markers for start and end Point
         Log.d("/d", "Source String: " + sourceString);
-        Log.d("/d", "Source position: " + source.latitude  + ", " + source.longitude);
-        Log.d("/d", "Dest position: " + destination.latitude  + ", " + destination.longitude);
+        Log.d("/d", "Source position: " + source.latitude + ", " + source.longitude);
+        Log.d("/d", "Dest position: " + destination.latitude + ", " + destination.longitude);
         Log.d("/d", "Dest String: " + destString);
         mMap.addMarker(new MarkerOptions().position(source).title(sourceString));
         mMap.addMarker(new MarkerOptions().position(destination).title(destString));
@@ -157,9 +153,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.moveCamera(CameraUpdateFactory.zoomTo((float) 15));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(source));
 
+        // Console Printouts
         Log.d("/d", "Source String: " + sourceString);
         Log.d("/d", "Source LatLNG: " + source);
-
         Log.d("/d", "Dest String: " + destString);
         Log.d("/d", "Dest LatLNG: " + destination);
 
