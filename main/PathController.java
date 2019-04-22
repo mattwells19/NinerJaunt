@@ -6,7 +6,7 @@ import com.google.android.gms.maps.model.LatLng;
 
 public class PathController {
     // Global Variables for Building LatLngs
-    private LatLng epicBuilding = new LatLng(35.3110291, -80.7416471);
+    private LatLng epicBuilding = new LatLng(35.309331, -80.741411);
     private LatLng dukeCentennial = new LatLng(35.31103, -80.74166);
     private LatLng bioinformatics = new LatLng(35.312492, -80.741848);
     private LatLng griggHall = new LatLng(35.311427, -80.741726);
@@ -35,10 +35,6 @@ public class PathController {
                 mapValue = griggHall;
                 Log.d("/d", "Source = grigg");
                 break;
-            case "Kulwicki Laboratory":
-                mapValue = kulwickiLab;
-                Log.d("/d", "Source = kulwicki");
-                break;
             case "Motorsports Research":
                 mapValue = motorSports;
                 Log.d("/d", "Source = motorsports");
@@ -51,7 +47,10 @@ public class PathController {
                 mapValue = baseball;
                 Log.d("/d", "Source = baseball");
                 break;
-
+            case "Current Location":
+                mapValue = null;
+                Log.d("/d", "source = current location");
+                break;
             default:
                 mapValue = null;
 

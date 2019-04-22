@@ -1,10 +1,18 @@
 package com.example.ninerjaunt;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Path;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -30,6 +38,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // Google Maps Variable
     private GoogleMap mMap;
 
+    private boolean flag = true;
     // Class Variables
     private LatLng source;
     private LatLng destination;
@@ -37,6 +46,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private String destString;
     public static ArrayList<LatLng> latLngArrayList = new ArrayList<>();
     int x = 0;
+    static String TOAST_KEY = "3W4JFL";
 
 
     // API Requirements
@@ -45,6 +55,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
+        flag = true;
         // Reset the Array if user reloads App
         latLngArrayList.clear();
 
@@ -67,8 +79,64 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             PathController pathController = new PathController();
 
             // Call method return latlng of source and dest (Utilize the Controller)
-            source = pathController.spinnerSwitch(sourceString);
-            destination = pathController.spinnerSwitch(destString);
+            if (!sourceString.equals("Current Location") && !destString.equals("Current Location")) {
+                source = pathController.spinnerSwitch(sourceString);
+                destination = pathController.spinnerSwitch(destString);
+                Log.d("/d", "Current Location Not Picked");
+            }
+
+
+            // Check if user has permissions granted for locations on their phone
+            else if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+
+                if (sourceString.equals("Current Location")) {
+
+                    LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                    Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    double longitude = location.getLongitude();
+                    double latitude = location.getLatitude();
+                    LatLng temp = new LatLng(longitude, latitude);
+                    source = temp;
+                    destination = pathController.spinnerSwitch(destString);
+                    Log.d("/d", "Current Location Picked for Source");
+                }
+                if (destString.equals("Current Location")) {
+                    LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                    Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    double longitude = location.getLongitude();
+                    double latitude = location.getLatitude();
+                    LatLng temp = new LatLng(longitude, latitude);
+                    destination = temp;
+                    source = pathController.spinnerSwitch(destString);
+                    Log.d("/d", "Current Location Picked for Dest");
+
+                }
+
+            }
+
+
+            // IF user doesn't have permissions granted the values will default to null
+            if (destination == null) {
+                Log.d("/d", "Destination Null");
+                Intent intent = new Intent(this, MainActivity.class);
+                intent.putExtra(TOAST_KEY, "Location Can't be Found");
+                flag = false;
+                startActivity(intent);
+                finish();
+                return;
+
+            } else if (source == null) {
+                Log.d("/d", "Source Null");
+                Intent intent = new Intent(this, MainActivity.class);
+                intent.putExtra(TOAST_KEY, "Location Can't be Found");
+                flag = false;
+                startActivity(intent);
+                finish();
+                return;
+            }
+
+
 
 
             UNCCPath path = new UNCCPath(source.latitude, source.longitude, destination.latitude, destination.longitude);
@@ -96,9 +164,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     /**
      * Manipulates the map once available.
      */
+
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
-
+            if (!flag)
+                return;
 
         // Log Statement to indicate onMapRunning
         Log.d("/d", "onMapReady: Executing");
@@ -109,7 +180,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // Set map to Hybrid View (Satellite + Street)
         mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-
 
         // Change mapType functionality
         Button button = findViewById(R.id.ChangeMapView);
@@ -158,7 +228,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Log.d("/d", "Source LatLNG: " + source);
         Log.d("/d", "Dest String: " + destString);
         Log.d("/d", "Dest LatLNG: " + destination);
-
-
     }
+
 }
